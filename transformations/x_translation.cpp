@@ -8,7 +8,6 @@ using namespace ioh::problem::transformation::variables;
 const int num_sampling = 100;
 const int num_x = 1000;
 const int dim = 10;
-const string experiment_resutls_path = "results/experiment_rotation2D/";
 
 void read_x(vector<vector<vector<double>>> &x_sets)
 {
