@@ -11,7 +11,6 @@ from pflacco.classical_ela_features import calculate_ela_distribution
 from pflacco.classical_ela_features import calculate_ela_level
 from pflacco.classical_ela_features import calculate_ela_meta
 from pflacco.classical_ela_features import calculate_information_content
-from pflacco.classical_ela_features import calculate_limo
 from pflacco.classical_ela_features import calculate_nbc
 from pflacco.classical_ela_features import calculate_pca
 
@@ -110,7 +109,7 @@ if __name__ == "__main__":
             start_time = time.time()
             records = []
             prefix = [problem_id, i]
-            file_path = f"data/x_translation/{problem_id}_{i}.txt"
+            file_path = f"ecta2024_data/x_translation/{problem_id}_{i}.txt"
             y = read_y(file_path, num_sampling, num_x)
             for j in range(num_sampling):
                 print(j)
@@ -119,6 +118,7 @@ if __name__ == "__main__":
             column_name = prefix_name + keys
             end_time = time.time()
             dataset_df = pd.DataFrame(records, columns=column_name)
-            dataset_df.to_csv(f"data/x_translation/ela/{problem_id}_{i}.csv",
-                            index=False)
+            dataset_df.to_csv(
+                f"ecta2024_data/x_translation/ela/{problem_id}_{i}.csv",
+                index=False)
             print(end_time - start_time)
