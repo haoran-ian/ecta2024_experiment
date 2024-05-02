@@ -41,14 +41,10 @@ void read_x(vector<vector<vector<double>>> &x_sets)
 }
 
 // , double rvec[dim][dim]
-void x_affine(int problem_id, vector<double> &x, double scale_factor,
-              vector<double> tvec)
+void x_affine(vector<double> &x, vector<double> tvec)
 {
     for (int i = 0; i < dim; i++)
-    {
-        x[i] *= scale_factor;
         x[i] += tvec[i];
-    }
 }
 
 int main()
@@ -82,20 +78,12 @@ int main()
             std::ofstream file(filename);
             vector<double> tvec;
             tvec = tvecs[i];
-            // for (auto t : tvec)
-            //     cout << t << " ";
-            // cout << endl;
-            // vector<double> temp = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
-            // x_affine(problem_id, temp, 1.0, tvec);
-            // cout << temp << endl;
             for (int j = 0; j < 100; j++)
             {
                 for (int k = 0; k < 1000; k++)
                 {
-                    vector<double> x;
-                    for (int ind = 0; ind < dim; ind++)
-                        x.push_back(x_sets[j][k][ind]);
-                    x_affine(problem_id, x, 1.0, tvec);
+                    vector<double> x(x_sets[j][k]);
+                    x_affine(x, tvec);
                     file << (*problem)(x) << " ";
                 }
                 file << endl;
