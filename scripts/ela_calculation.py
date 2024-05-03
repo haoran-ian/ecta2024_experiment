@@ -110,9 +110,9 @@ if __name__ == "__main__":
             records = []
             prefix = [problem_id, i]
             file_path = f"ecta2024_data/x_translation/{problem_id}_{i}.txt"
+            print(file_path)
             y = read_y(file_path, num_sampling, num_x)
             for j in range(num_sampling):
-                print(j)
                 keys, values = ela_calculation(X[j], y[j])
                 records += [prefix + values]
             column_name = prefix_name + keys
@@ -121,4 +121,26 @@ if __name__ == "__main__":
             dataset_df.to_csv(
                 f"ecta2024_data/x_translation/ela/{problem_id}_{i}.csv",
                 index=False)
-            print(end_time - start_time)
+            print(f"x translation calculation time: {end_time - start_time}")
+    elif case_id == 2:
+        # x scaling
+        prefix_name = ["problem_id", "k"]
+        k = 1.1
+        while k < 4.1:
+            start_time = time.time()
+            records = []
+            prefix = [problem_id, k]
+            file_path = f"ecta2024_data/x_scaling/{problem_id}_{k:.6f}.txt"
+            print(file_path)
+            y = read_y(file_path, num_sampling, num_x)
+            for j in range(num_sampling):
+                keys, values = ela_calculation(X[j], y[j])
+                records += [prefix + values]
+            column_name = prefix_name + keys
+            end_time = time.time()
+            dataset_df = pd.DataFrame(records, columns=column_name)
+            dataset_df.to_csv(
+                f"ecta2024_data/x_scaling/ela/{problem_id}_{k:.1f}.csv",
+                index=False)
+            print(f"x scaling calculation time: {end_time - start_time}")
+            k += 0.1
