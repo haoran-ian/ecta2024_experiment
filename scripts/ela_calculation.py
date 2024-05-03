@@ -113,7 +113,7 @@ if __name__ == "__main__":
             y = read_y(file_path, num_sampling, num_x)
             for j in range(num_sampling):
                 print(j)
-                keys, values = ela_calculation(X[i], y[i])
+                keys, values = ela_calculation(X[j], y[j])
                 records += [prefix + values]
             column_name = prefix_name + keys
             end_time = time.time()
