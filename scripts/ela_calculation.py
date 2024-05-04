@@ -193,3 +193,4 @@ if __name__ == "__main__":
                 f"ecta2024_data/y_scaling/ela/{problem_id}_{k:.1f}.csv",
                 index=False)
             print(f"y scaling calculation time: {end_time - start_time}")
+            k += 0.1
