@@ -56,12 +56,12 @@ int main()
             ioh::problem::ProblemRegistry<ioh::problem::CEC2022>::instance();
         auto problem = problem_factory.create(problem_id, 1, dim);
 
-        for (double i = -4; i < 4.1; i += 0.1)
+        for (double i = -3; i < 3.1; i += 0.1)
         {
             double K = pow(2, i);
             std::string filename = "data/x_scaling/" +
                                    std::to_string(problem_id) + "_" +
-                                   std::to_string(K) + ".txt";
+                                   std::to_string(i) + ".txt";
             std::ofstream file(filename);
             for (int j = 0; j < 100; j++)
             {
