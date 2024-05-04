@@ -124,9 +124,9 @@ if __name__ == "__main__":
             print(f"x translation calculation time: {end_time - start_time}")
     elif case_id == 2:
         # x scaling
-        prefix_name = ["problem_id", "k"]
-        k = 1.1
-        while k < 4.1:
+        prefix_name = ["problem_id", "log_2^k"]
+        k = -3.0
+        while k < 3.1:
             start_time = time.time()
             records = []
             prefix = [problem_id, k]
