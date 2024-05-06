@@ -17,20 +17,33 @@ def read_matrices_to_array(filename):
         raise ValueError("Not enough data to form a (100, 10, 10) array")
 
 
-def trace(matrix):
-    return np.trace(matrix)
+def is_orthogonal(matrix):
+    if matrix.shape != (10, 10):
+        return False
+    identity = np.eye(10)
+    matrix_transposed = matrix.T
+    product1 = np.dot(matrix, matrix_transposed)
+    product2 = np.dot(matrix_transposed, matrix)
+    return np.allclose(product1, identity) and np.allclose(product2, identity)
 
 
 filename = "config/random_look_10d_rotation_matrices.txt"
 array = read_matrices_to_array(filename)
-flag = True
+trace_flag = True
+orthogonal_flag = True
 for i in range(array.shape[0]):
     ind = int(i/5)
     low = ind*0.2-2.
     high = (ind+1)*0.2-2.
-    t = trace(array[i])
+    t = np.trace(array[i])
     if t < low or t > high:
-        flag = False
-        print(f"Trace of matrix {i} is {t}, which is not in the range [{low}, {high}]")
-if flag:
-    print("All traces are in the correct range")
+        trace_flag = False
+        print(
+            f"Trace of matrix {i} is {t}, which is not in the range [{low}, {high}]")
+    if not is_orthogonal(array[i]):
+        orthogonal_flag = False
+        print(f"Matrix {i} is not orthogonal.")
+if trace_flag:
+    print("All traces are in the correct range.")
+if orthogonal_flag:
+    print("All traces are orthogonal.")
