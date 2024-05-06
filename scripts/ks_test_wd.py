@@ -91,13 +91,13 @@ def y_scaling_analysis(conn):
 def y_translation_analysis(conn):
     sql_query = "SELECT * FROM origin"
     df_origin = pd.read_sql_query(sql_query, conn)
-    df_origin.insert(1, "dy", 0.)
+    df_origin.insert(1, "d_y", 0.)
     sql_query = "SELECT * FROM y_translation"
     df_y_translation = pd.read_sql_query(sql_query, conn)
     grouped_p = df_origin.groupby(
-        ["problem_id", "dy"]).agg(list).reset_index()
+        ["problem_id", "d_y"]).agg(list).reset_index()
     grouped_q = df_y_translation.groupby(
-        ["problem_id", "dy"]).agg(list).reset_index().values
+        ["problem_id", "d_y"]).agg(list).reset_index().values
     analysis = [[] for _ in range(3)]
     for i in range(grouped_q.shape[0]):
         for j in range(3):

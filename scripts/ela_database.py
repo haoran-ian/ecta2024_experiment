@@ -60,6 +60,7 @@ def parse_y_translation(file_names, conn):
             df = df_prob
         else:
             df = pd.concat([df, df_prob], axis=0)
+    df = df.rename(columns={'dy': 'd_y'})
     df.to_sql("y_translation", conn, index=False)
 
 
