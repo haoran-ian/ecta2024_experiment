@@ -1,21 +1,8 @@
-import sys
 import sqlite3
 import numpy as np
 import pandas as pd
 
 from scipy.stats import ks_2samp, wasserstein_distance
-
-
-def redirect_x_translation(df, conn):
-    sql_query = f"SELECT * FROM tvec"
-    df_tvec = pd.read_sql_query(sql_query, conn)
-    tvec_L1 = df_tvec.set_index("tvec_id")["translation distance"].to_dict()
-    df["tvec_L1"] = df["tvec_id"].map(tvec_L1)
-    position = df.columns.get_loc("tvec_id")
-    df.insert(position, "tvec_L1_new", df["tvec_L1"])
-    df.drop(["tvec_id", "tvec_L1"], axis=1, inplace=True)
-    df.rename(columns={"tvec_L1_new": "tvec_L1"}, inplace=True)
-    return df
 
 
 def transformation_analysis(conn, transformation, indicator):
@@ -53,23 +40,17 @@ def transformation_analysis(conn, transformation, indicator):
             analysis[2][-1] += [emd]
     analysis = np.array(analysis)
     result = pd.DataFrame(analysis[0], columns=df.columns)
-    if transformation == "x_translation":
-        result = redirect_x_translation(result, conn)
     result.to_sql(f"{transformation}_ks_statistic", conn, index=False)
     result = pd.DataFrame(analysis[1], columns=df.columns)
-    if transformation == "x_translation":
-        result = redirect_x_translation(result, conn)
     result.to_sql(f"{transformation}_ks_pvalue", conn, index=False)
     result = pd.DataFrame(analysis[2], columns=df.columns)
-    if transformation == "x_translation":
-        result = redirect_x_translation(result, conn)
     result.to_sql(f"{transformation}_emd", conn, index=False)
 
 
 if __name__ == "__main__":
     transformations = ["x_rotation", "x_scaling", "x_translation",
                        "y_scaling", "y_translation"]
-    indicators = ["trace", "log_2^k", "tvec_id", "log_2^k", "d_y"]
+    indicators = ["trace", "log_2^k", "d_x", "log_2^k", "d_y"]
     conn = sqlite3.connect("ecta2024_data/atom_data.db")
     for i in range(len(transformations)):
         transformation = transformations[i]

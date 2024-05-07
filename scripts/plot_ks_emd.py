@@ -35,15 +35,6 @@ def lineplot(transformation, indicator, ax1, conn):
         selected_pvalue[:, 2] = ratios
         if transformation == "x_rotation":
             x, y = rotation_avg(selected_pvalue[:, 1], selected_pvalue[:, 2])
-        elif transformation == "x_translation":
-            # df_temp = pd.DataFrame(selected_pvalue[:, :3], columns=[
-            #                        "problem_id", "tvec_L1", "ratio"])
-            # print(df_temp)
-            # x = [5. * i for i in range(1, 21)]
-            # y = df_temp.groupby("tvec_L1")["ratio"].mean().values
-            x = selected_pvalue[:20, 1]
-            y = selected_pvalue[:20, 2]
-            print(selected_pvalue)
         else:
             first_positive_index = np.where(selected_pvalue[:, 1] > 0)[0][0]
             x = np.insert(selected_pvalue[:, 1], first_positive_index, 0.)
@@ -55,13 +46,6 @@ def lineplot(transformation, indicator, ax1, conn):
         selected_emd[:, 2] = counts
         if transformation == "x_rotation":
             x, y = rotation_avg(selected_emd[:, 1], selected_emd[:, 2])
-        elif transformation == "x_translation":
-            # df_temp = pd.DataFrame(selected_emd[:, :3], columns=[
-            #                        "problem_id", "tvec_L1", "ratio"])
-            # x = [5. * i for i in range(1, 21)]
-            # y = df_temp.groupby("tvec_L1")["ratio"].mean().values
-            x = selected_pvalue[:20, :1]
-            y = selected_pvalue[:20, :2]
         else:
             x = np.insert(selected_emd[:, 1], first_positive_index, 0.)
             y = np.insert(selected_emd[:, 2], first_positive_index, 0.)
@@ -72,6 +56,7 @@ def lineplot(transformation, indicator, ax1, conn):
     ax1.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1))
     ax2.set_ylabel("EMD", color='b')
     ax2.tick_params(axis='y', labelcolor='b')
+    ax1.set_title(f"{transformation}")
 
 
 if __name__ == "__main__":
@@ -79,10 +64,10 @@ if __name__ == "__main__":
         os.mkdir("results/aggregation/")
     transformations = ["x_translation", "y_translation",
                        "x_scaling", "y_scaling", "x_rotation",]
-    indicator = ["tvec_id", "log_2^k", "log_2^k", "d_y", "trace",]
+    indicator = ["d_x", "d_y", "log_2^k", "log_2^k", "trace",]
     conn = sqlite3.connect("ecta2024_data/atom_data.db")
     plt.style.use("seaborn-v0_8-darkgrid")
-    fig, axs = plt.subplots(3, 2, figsize=(20, 18))
+    fig, axs = plt.subplots(3, 2, figsize=(15, 13))
     axs = axs.ravel()
     axs[5].axis('off')
     for i in range(len(transformations)):
@@ -92,3 +77,4 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.savefig(f"results/aggregation/results.png")
     plt.cla()
+    print("Done!")

@@ -1,7 +1,5 @@
 import os
-import re
 import sqlite3
-import numpy as np
 import pandas as pd
 
 
@@ -17,24 +15,12 @@ def redirect_rotation(df, conn):
     return df
 
 
-# def redirect_x_translation(df, conn):
-#     sql_query = f"SELECT * FROM tvec"
-#     df_tvec = pd.read_sql_query(sql_query, conn)
-#     tvec_L1 = df_tvec.set_index("tvec_id")["translation distance"].to_dict()
-#     df["tvec_L1"] = df["tvec_id"].map(tvec_L1)
-#     position = df.columns.get_loc("tvec_id")
-#     df.insert(position, "tvec_L1_new", df["tvec_L1"])
-#     df.drop(["tvec_id", "tvec_L1"], axis=1, inplace=True)
-#     df.rename(columns={"tvec_L1_new": "tvec_L1"}, inplace=True)
-#     return df
-
-
 def parse_transformations(transformation, conn):
     print(f"Processing {transformation} to database...")
     df = pd.DataFrame()
     if transformation == "x_translation":
         for i in range(1, 6):
-            for j in range(200):
+            for j in range(1, 41):
                 file_name = f"ecta2024_data/x_translation/ela/{i}_{j}.csv"
                 df_prob = pd.read_csv(file_name)
                 df = df_prob if df.empty else pd.concat([df, df_prob], axis=0)
@@ -48,8 +34,6 @@ def parse_transformations(transformation, conn):
             df = df_prob if df.empty else pd.concat([df, df_prob], axis=0)
     if transformation == "x_rotation":
         df = redirect_rotation(df, conn)
-    # elif transformation == "x_translation":
-    #     df = redirect_x_translation(df, conn)
     elif transformation == "y_translation":
         df = df.rename(columns={"dy": "d_y"})
     df.to_sql(f"{transformation}", conn, index=False)
