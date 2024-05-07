@@ -18,20 +18,13 @@ def redirect_rotation(df, conn):
 def parse_transformations(transformation, conn):
     print(f"Processing {transformation} to database...")
     df = pd.DataFrame()
-    if transformation == "x_translation":
-        for i in range(1, 6):
-            for j in range(1, 41):
-                file_name = f"ecta2024_data/x_translation/ela/{i}_{j}.csv"
-                df_prob = pd.read_csv(file_name)
-                df = df_prob if df.empty else pd.concat([df, df_prob], axis=0)
-    else:
-        file_names = os.listdir(f"ecta2024_data/{transformation}/ela")
-        for file_name in file_names:
-            df_prob = pd.read_csv(
-                f"ecta2024_data/{transformation}/ela/{file_name}")
-            if transformation == "origin":
-                df_prob = df_prob.drop("log_2^k", axis=1)
-            df = df_prob if df.empty else pd.concat([df, df_prob], axis=0)
+    file_names = os.listdir(f"ecta2024_data/{transformation}/ela")
+    for file_name in file_names:
+        df_prob = pd.read_csv(
+            f"ecta2024_data/{transformation}/ela/{file_name}")
+        if transformation == "origin":
+            df_prob = df_prob.drop("log_2^k", axis=1)
+        df = df_prob if df.empty else pd.concat([df, df_prob], axis=0)
     if transformation == "x_rotation":
         df = redirect_rotation(df, conn)
     elif transformation == "y_translation":
