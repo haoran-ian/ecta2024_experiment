@@ -148,6 +148,28 @@ if __name__ == "__main__":
                 index=False)
             print(f"x scaling calculation time: {end_time - start_time}")
             k += 0.1
+    elif case_id == 3:
+        # x scaling
+        if not os.path.exists("ecta2024_data/x_rotation/ela/"):
+            os.makedirs("ecta2024_data/x_rotation/ela/")
+        prefix_name = ["problem_id", "matrix_id"]
+        for i in range(100):
+            start_time = time.time()
+            records = []
+            prefix = [problem_id, i]
+            file_path = f"ecta2024_data/x_rotation/{problem_id}_{i}.txt"
+            print(file_path)
+            y = read_y(file_path, num_sampling, num_x)
+            for j in range(num_sampling):
+                keys, values = ela_calculation(X[j], y[j])
+                records += [prefix + values]
+            column_name = prefix_name + keys
+            end_time = time.time()
+            dataset_df = pd.DataFrame(records, columns=column_name)
+            dataset_df.to_csv(
+                f"ecta2024_data/x_rotation/ela/{problem_id}_{i}.csv",
+                index=False)
+            print(f"x rotation calculation time: {end_time - start_time}")
     elif case_id == 4:
         # y translation
         if not os.path.exists("ecta2024_data/y_translation/ela/"):
