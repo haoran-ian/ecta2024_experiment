@@ -9,3 +9,4 @@ external/
 IOHexperimenter/
 thesis_scripts/
 nohup.out
+*test.*

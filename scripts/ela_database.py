@@ -17,25 +17,47 @@ def redirect_rotation(df, conn):
     return df
 
 
-def parse_transformations(file_names, transformation, conn):
+# def redirect_x_translation(df, conn):
+#     sql_query = f"SELECT * FROM tvec"
+#     df_tvec = pd.read_sql_query(sql_query, conn)
+#     tvec_L1 = df_tvec.set_index("tvec_id")["translation distance"].to_dict()
+#     df["tvec_L1"] = df["tvec_id"].map(tvec_L1)
+#     position = df.columns.get_loc("tvec_id")
+#     df.insert(position, "tvec_L1_new", df["tvec_L1"])
+#     df.drop(["tvec_id", "tvec_L1"], axis=1, inplace=True)
+#     df.rename(columns={"tvec_L1_new": "tvec_L1"}, inplace=True)
+#     return df
+
+
+def parse_transformations(transformation, conn):
     print(f"Processing {transformation} to database...")
     df = pd.DataFrame()
-    for file_name in file_names:
-        df_prob = pd.read_csv(
-            f"ecta2024_data/{transformation}/ela/{file_name}")
-        if transformation == "origin":
-            df_prob = df_prob.drop("log_2^k", axis=1)
-        df = df_prob if df.empty else pd.concat([df, df_prob], axis=0)
+    if transformation == "x_translation":
+        for i in range(1, 6):
+            for j in range(200):
+                file_name = f"ecta2024_data/x_translation/ela/{i}_{j}.csv"
+                df_prob = pd.read_csv(file_name)
+                df = df_prob if df.empty else pd.concat([df, df_prob], axis=0)
+    else:
+        file_names = os.listdir(f"ecta2024_data/{transformation}/ela")
+        for file_name in file_names:
+            df_prob = pd.read_csv(
+                f"ecta2024_data/{transformation}/ela/{file_name}")
+            if transformation == "origin":
+                df_prob = df_prob.drop("log_2^k", axis=1)
+            df = df_prob if df.empty else pd.concat([df, df_prob], axis=0)
     if transformation == "x_rotation":
         df = redirect_rotation(df, conn)
-    if transformation == "y_translation":
+    # elif transformation == "x_translation":
+    #     df = redirect_x_translation(df, conn)
+    elif transformation == "y_translation":
         df = df.rename(columns={"dy": "d_y"})
     df.to_sql(f"{transformation}", conn, index=False)
 
 
 if __name__ == "__main__":
-    transformations = ["origin", "x_rotation",
-                       "x_scaling", "y_scaling", "y_translation"]
+    transformations = ["origin", "x_rotation", "x_scaling",
+                       "x_translation", "y_scaling", "y_translation"]
     conn = sqlite3.connect("ecta2024_data/atom_data.db")
     for transformation in transformations:
         cursor = conn.cursor()
@@ -43,7 +65,6 @@ if __name__ == "__main__":
             name='{transformation}'")
         if cursor.fetchone():
             cursor.execute(f"drop table {transformation}")
-        file_names = os.listdir(f"ecta2024_data/{transformation}/ela")
-        parse_transformations(file_names, transformation, conn)
+        parse_transformations(transformation, conn)
     conn.close()
     print("Done!")
