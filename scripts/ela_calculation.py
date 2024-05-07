@@ -106,12 +106,12 @@ if __name__ == "__main__":
         # x translation
         if not os.path.exists("ecta2024_data/x_translation/ela/"):
             os.makedirs("ecta2024_data/x_translation/ela/")
-        prefix_name = ["problem_id", "tvec_id"]
-        for i in range(1000):
+        prefix_name = ["problem_id", "d_x"]
+        for i in range(1, 101):
             start_time = time.time()
             records = []
             prefix = [problem_id, i]
-            file_path = f"ecta2024_data/x_translation/{problem_id}_{i}.txt"
+            file_path = f"ecta2024_data/x_translation/{problem_id}_{i:.6f}.txt"
             print(file_path)
             y = read_y(file_path, num_sampling, num_x)
             for j in range(num_sampling):
