@@ -5,67 +5,37 @@ import numpy as np
 import pandas as pd
 
 
-def parse_origin(file_names, conn):
+def redirect_rotation(df, conn):
+    sql_query = f"SELECT * FROM trace"
+    df_trace = pd.read_sql_query(sql_query, conn)
+    id_to_trace_dict = df_trace.set_index("matrix_id")["trace"].to_dict()
+    df["trace"] = df["matrix_id"].map(id_to_trace_dict)
+    position = df.columns.get_loc("matrix_id")
+    df.insert(position, "trace_new", df["trace"])
+    df.drop(["matrix_id", "trace"], axis=1, inplace=True)
+    df.rename(columns={"trace_new": "trace"}, inplace=True)
+    return df
+
+
+def parse_transformations(file_names, transformation, conn):
+    print(f"Processing {transformation} to database...")
     df = pd.DataFrame()
     for file_name in file_names:
-        problem_id = int(file_name.split("_")[0])
-        df_prob = pd.read_csv(f"ecta2024_data/origin/ela/{file_name}")
-        df_prob = df_prob.drop("log_2^k", axis=1)
-        if df.empty:
-            df = df_prob
-        else:
-            df = pd.concat([df, df_prob], axis=0)
-    df.to_sql("origin", conn, index=False)
-
-
-def parse_x_scaling(file_names, conn):
-    df = pd.DataFrame()
-    for file_name in file_names:
-        # pattern = r"-?\d+\.\d+|-?\d+"
-        # numbers = re.findall(pattern, file_name)
-        # problem_id = int(numbers[0])
-        # k = float(numbers[1])
-        df_prob = pd.read_csv(f"ecta2024_data/x_scaling/ela/{file_name}")
-        if df.empty:
-            df = df_prob
-        else:
-            df = pd.concat([df, df_prob], axis=0)
-    df.to_sql("x_scaling", conn, index=False)
-
-
-def parse_x_translation(file_names, conn):
-    pass
-
-
-def parse_y_scaling(file_names, conn):
-    df = pd.DataFrame()
-    for file_name in file_names:
-        # pattern = r"-?\d+\.\d+|-?\d+"
-        # numbers = re.findall(pattern, file_name)
-        # problem_id = int(numbers[0])
-        # k = float(numbers[1])
-        df_prob = pd.read_csv(f"ecta2024_data/y_scaling/ela/{file_name}")
-        if df.empty:
-            df = df_prob
-        else:
-            df = pd.concat([df, df_prob], axis=0)
-    df.to_sql("y_scaling", conn, index=False)
-
-
-def parse_y_translation(file_names, conn):
-    df = pd.DataFrame()
-    for file_name in file_names:
-        df_prob = pd.read_csv(f"ecta2024_data/y_translation/ela/{file_name}")
-        if df.empty:
-            df = df_prob
-        else:
-            df = pd.concat([df, df_prob], axis=0)
-    df = df.rename(columns={'dy': 'd_y'})
-    df.to_sql("y_translation", conn, index=False)
+        df_prob = pd.read_csv(
+            f"ecta2024_data/{transformation}/ela/{file_name}")
+        if transformation == "origin":
+            df_prob = df_prob.drop("log_2^k", axis=1)
+        df = df_prob if df.empty else pd.concat([df, df_prob], axis=0)
+    if transformation == "x_rotation":
+        df = redirect_rotation(df, conn)
+    if transformation == "y_translation":
+        df = df.rename(columns={"dy": "d_y"})
+    df.to_sql(f"{transformation}", conn, index=False)
 
 
 if __name__ == "__main__":
-    transformations = ["origin", "x_scaling", "y_scaling", "y_translation"]
+    transformations = ["origin", "x_rotation",
+                       "x_scaling", "y_scaling", "y_translation"]
     conn = sqlite3.connect("ecta2024_data/atom_data.db")
     for transformation in transformations:
         cursor = conn.cursor()
@@ -74,15 +44,6 @@ if __name__ == "__main__":
         if cursor.fetchone():
             cursor.execute(f"drop table {transformation}")
         file_names = os.listdir(f"ecta2024_data/{transformation}/ela")
-        if transformation == "origin":
-            parse_origin(file_names, conn)
-        elif transformation == "x_scaling":
-            parse_x_scaling(file_names, conn)
-        elif transformation == "y_scaling":
-            parse_y_scaling(file_names, conn)
-        elif transformation == "y_translation":
-            parse_y_translation(file_names, conn)
-        # table_values = read_atom_array(table_name)
-        # df = array_to_dataframe(table_values, table_name)
-        # df.to_sql(table_name, conn, index=False)
-        # print(table_name)
+        parse_transformations(file_names, transformation, conn)
+    conn.close()
+    print("Done!")
