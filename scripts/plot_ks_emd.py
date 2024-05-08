@@ -25,7 +25,9 @@ def lineplot(transformation, indicator, ax1, conn):
     sql_query = f"SELECT * FROM {transformation}_emd"
     df_emd = pd.read_sql_query(sql_query, conn)
     ax2 = ax1.twinx()
-    for problem_id in range(1, 6):
+    for problem_id in range(1, 13):
+        if problem_id > 5 and transformation not in ["y_translation", "y_scaling",]:
+            continue
         selected_pvalue = df_ks_pvalue[df_ks_pvalue["problem_id"]
                                        == problem_id].values
         columns_to_check = selected_pvalue[:, 2:]
@@ -57,14 +59,22 @@ def lineplot(transformation, indicator, ax1, conn):
     ax2.set_ylabel("EMD", color='b')
     ax2.tick_params(axis='y', labelcolor='b')
     ax1.set_title(f"{transformation}")
+    ax1.legend()
 
 
 if __name__ == "__main__":
     if not os.path.exists("results/aggregation/"):
         os.mkdir("results/aggregation/")
-    transformations = ["x_translation", "y_translation",
-                       "x_scaling", "y_scaling", "x_rotation",]
-    indicator = ["d_x", "d_y", "log_2^k", "log_2^k", "trace",]
+    transformations = ["x_translation",
+                       "y_translation",
+                       "x_scaling",
+                       "y_scaling",
+                       "x_rotation",]
+    indicator = ["d_x",
+                 "d_y",
+                 "log_2^k",
+                 "log_2^k",
+                 "trace",]
     conn = sqlite3.connect("ecta2024_data/atom_data.db")
     plt.style.use("seaborn-v0_8-darkgrid")
     fig, axs = plt.subplots(3, 2, figsize=(15, 13))

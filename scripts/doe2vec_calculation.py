@@ -24,7 +24,8 @@ def read_x(num_sampling, num_x):
     return np.array(X)
 
 x = read_x(100, 1000)
-x = x[0]
+x = x[0][:100, :]
+print(x.shape)
 obj = doe_model(10, 1, n=1000000, latent_dim=32, custom_sample=x,
                 model_type="VAE", kl_weight=0.001, use_mlflow=False)
 if not obj.loadModel("../models"):

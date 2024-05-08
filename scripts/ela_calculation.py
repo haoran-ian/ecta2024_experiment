@@ -199,6 +199,9 @@ if __name__ == "__main__":
         prefix_name = ["problem_id", "log_2^k"]
         k = -3.0
         while k < 3.1:
+            if f"{k:.1f}" == "0.0":
+                k += 0.1
+                continue
             start_time = time.time()
             records = []
             prefix = [problem_id, k]
