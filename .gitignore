@@ -8,5 +8,6 @@ ecta2024_data/
 external/
 IOHexperimenter/
 thesis_scripts/
+__pycache__/
 nohup.out
 *test.*
