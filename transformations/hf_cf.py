@@ -59,7 +59,8 @@ def x_rotation(problem, matrix, x):
         for i in range(x.shape[0]):
             tempx = x[i].T.copy()
             for j in range(tempx.shape[1]):
-                tempx[:, j] = np.dot(matrix[matrix_id], tempx[:, j])
+                rvec = matrix[matrix_id].copy()
+                tempx[:, j] = np.dot(rvec, tempx[:, j])
             problem.values(tempx)
             results += [problem.ObjFunc.tolist()]
         results = np.array(results)
@@ -86,6 +87,23 @@ def x_scaling(problem, x):
         print(f"Saving to {file_name}")
         np.savetxt(file_name, results)
 
+def x_translation(problem, x):
+    pid = problem.func
+    print(f"Processing: problem id: {pid}, transformation: x translation.")
+    for d_x in range(1, 101):
+        results = []
+        tvec = np.random.uniform(-1, 1, 10) * d_x
+        for i in range(x.shape[0]):
+            input_x = x[i].T.copy()
+            for j in range(input_x.shape[1]):
+                input_x[:, j] += tvec
+            problem.values(input_x)
+            results += [problem.ObjFunc.tolist()]
+        results = np.array(results)
+        file_name = f"ecta2024_data/x_translation/{pid}_{d_x:.6f}.txt"
+        print(f"Saving to {file_name}")
+        np.savetxt(file_name, results)
+
 
 def transformations(problem_id, x):
     rvec_file_path = "config/random_look_10d_rotation_matrices.txt"
@@ -93,7 +111,8 @@ def transformations(problem_id, x):
     problem = CEC2022.cec2022_func(problem_id)
     # save_origin(problem, x)
     # x_rotation(problem, array, x)
-    x_scaling(problem, x)
+    # x_scaling(problem, x)
+    x_translation(problem, x)
 
 
 if __name__ == "__main__":
