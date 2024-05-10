@@ -49,17 +49,17 @@ def transformation_analysis(conn, transformation, indicator):
 
 if __name__ == "__main__":
     transformations = [
-        # "x_rotation",
-        # "x_scaling",
-        # "x_translation",
-           "y_scaling",
+        "x_rotation",
+        "x_scaling",
+        "x_translation",
+        "y_scaling",
         "y_translation"
     ]
     indicators = [
-        # "trace",
-        # "log_2^k",
-        # "d_x",
-          "log_2^k",
+        "trace",
+        "log_2^k",
+        "d_x",
+        "log_2^k",
         "d_y"
     ]
     conn = sqlite3.connect("ecta2024_data/atom_data.db")

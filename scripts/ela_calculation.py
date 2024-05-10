@@ -131,6 +131,9 @@ if __name__ == "__main__":
         prefix_name = ["problem_id", "log_2^k"]
         k = -3.0
         while k < 3.1:
+            if f"{k:.1f}" == "0.0":
+                k += 0.1
+                continue
             start_time = time.time()
             records = []
             prefix = [problem_id, k]
@@ -149,7 +152,7 @@ if __name__ == "__main__":
             print(f"x scaling calculation time: {end_time - start_time}")
             k += 0.1
     elif case_id == 3:
-        # x scaling
+        # x rotation
         if not os.path.exists("ecta2024_data/x_rotation/ela/"):
             os.makedirs("ecta2024_data/x_rotation/ela/")
         prefix_name = ["problem_id", "matrix_id"]
