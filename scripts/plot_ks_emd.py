@@ -42,8 +42,8 @@ def lineplot(transformation, indicator, ax1, conn):
     sql_query = f"SELECT * FROM {transformation}_emd"
     df_emd = pd.read_sql_query(sql_query, conn)
     ax2 = ax1.twinx()
-    for problem_id in range(1, 6):
-        if problem_id > 5 and transformation not in ["y_translation", "y_scaling",]:
+    for problem_id in range(1, 13):
+        if problem_id > 5 and transformation not in ["x_scaling", "y_translation", "y_scaling",]:
             continue
         selected_pvalue = df_ks_pvalue[df_ks_pvalue["problem_id"]
                                        == problem_id].values
