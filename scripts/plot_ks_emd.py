@@ -36,15 +36,15 @@ def lineplot(transformation, indicator, ax1, conn):
     colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b',
               '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#aec7e8', '#ffbb78']
     markers = ['o', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd', '^', '<']
-    colors = [mcolors.to_rgba(color, alpha=0.5) for color in colors]
+    marker_colors = [mcolors.to_rgba(color, alpha=0.5) for color in colors]
     sql_query = f"SELECT * FROM {transformation}_ks_pvalue"
     df_ks_pvalue = pd.read_sql_query(sql_query, conn)
     sql_query = f"SELECT * FROM {transformation}_emd"
     df_emd = pd.read_sql_query(sql_query, conn)
     ax2 = ax1.twinx()
     for problem_id in range(1, 13):
-        if problem_id > 5 and transformation not in ["x_scaling", "y_translation", "y_scaling",]:
-            continue
+        # if problem_id > 5 and transformation not in ["x_rotation", "x_scaling", "y_translation", "y_scaling",]:
+        #     continue
         selected_pvalue = df_ks_pvalue[df_ks_pvalue["problem_id"]
                                        == problem_id].values
         columns_to_check = selected_pvalue[:, 2:]
@@ -59,7 +59,7 @@ def lineplot(transformation, indicator, ax1, conn):
             x = np.insert(selected_pvalue[:, 1], first_positive_index, 0.)
             y = np.insert(selected_pvalue[:, 2], first_positive_index, 0.)
         ax1.plot(x, y, color=colors[problem_id-1], marker=markers[problem_id-1],
-                 markersize=4, markerfacecolor=colors[problem_id-1],)
+                 markersize=4, markerfacecolor=marker_colors[problem_id-1],)
         selected_emd = df_emd[df_emd["problem_id"] == problem_id].values
         columns_to_check = selected_emd[:, 2:]
         counts = np.sum(columns_to_check, axis=1)
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b',
               '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#aec7e8', '#ffbb78']
     markers = ['o', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd', '^', '<']
-    colors = [mcolors.to_rgba(color, alpha=0.5) for color in colors]
+    marker_colors = [mcolors.to_rgba(color, alpha=0.5) for color in colors]
     conn = sqlite3.connect("ecta2024_data/atom_data.db")
     plt.style.use("seaborn-v0_8-darkgrid")
     fig, axs = plt.subplots(5, 1, figsize=(12, 15))
@@ -109,7 +109,7 @@ if __name__ == "__main__":
         axs[0].plot([], [], color=colors[problem_id-1],
                     marker=markers[problem_id-1],
                     markersize=4, label=build_label(problem_id, "kstest"),
-                    markerfacecolor=colors[problem_id-1])
+                    markerfacecolor=marker_colors[problem_id-1])
         axs[0].plot([], [], color=colors[problem_id-1], linestyle="dotted",
                     label=build_label(problem_id, "emd"))
         axs[0].plot([], [], color=colors[problem_id-1], linestyle="dashed",

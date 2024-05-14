@@ -6,7 +6,8 @@ from doe2vec import doe_model
 def encode_origin(problem_id, obj):
     file_path = f"ecta2024_data/origin/doe/{problem_id}.txt"
     cec_y = np.loadtxt(file_path)
-    y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+    # y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+    y = cec_y.flatten()
     encoded = obj.encode([y])
     return encoded[0]
 
@@ -16,7 +17,8 @@ def encode_x_rotation(problem_id, obj):
     for matrix_id in range(100):
         file_path = f"ecta2024_data/x_rotation/doe/{problem_id}_{matrix_id}.txt"
         cec_y = np.loadtxt(file_path)
-        y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        # y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        y = cec_y.flatten()
         encoded = obj.encode([y])
         vecs += [encoded[0].tolist()]
     return vecs
@@ -29,7 +31,8 @@ def encode_x_scaling(problem_id, obj):
             continue
         file_path = f"ecta2024_data/x_scaling/doe/{problem_id}_{log_k/10:.6f}.txt"
         cec_y = np.loadtxt(file_path)
-        y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        # y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        y = cec_y.flatten()
         encoded = obj.encode([y])
         vecs += [encoded[0].tolist()]
     return vecs
@@ -40,7 +43,8 @@ def encode_x_translation(problem_id, obj):
     for d_x in range(1, 101):
         file_path = f"ecta2024_data/x_translation/doe/{problem_id}_{d_x:.6f}.txt"
         cec_y = np.loadtxt(file_path)
-        y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        # y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        y = cec_y.flatten()
         encoded = obj.encode([y])
         vecs += [encoded[0].tolist()]
     return vecs
@@ -53,7 +57,8 @@ def encode_y_scaling(problem_id, obj):
             continue
         file_path = f"ecta2024_data/y_scaling/doe/{problem_id}_{log_k/10:.6f}.txt"
         cec_y = np.loadtxt(file_path)
-        y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        # y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        y = cec_y.flatten()
         encoded = obj.encode([y])
         vecs += [encoded[0].tolist()]
     return vecs
@@ -64,7 +69,8 @@ def encode_y_translation(problem_id, obj):
     for d_y in range(50, 1001, 50):
         file_path = f"ecta2024_data/y_translation/doe/{problem_id}_{d_y}.txt"
         cec_y = np.loadtxt(file_path)
-        y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        # y = (cec_y.flatten() - np.min(cec_y)) / (np.max(cec_y) - np.min(cec_y))
+        y = cec_y.flatten()
         encoded = obj.encode([y])
         vecs += [encoded[0].tolist()]
     return vecs
