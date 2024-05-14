@@ -58,6 +58,10 @@ def lineplot(transformation, indicator, ax1, conn):
             first_positive_index = np.where(selected_pvalue[:, 1] > 0)[0][0]
             x = np.insert(selected_pvalue[:, 1], first_positive_index, 0.)
             y = np.insert(selected_pvalue[:, 2], first_positive_index, 0.)
+            if transformation == "x_translation":
+                df = pd.DataFrame(y, columns=["y"])
+                df["avg_y"] = df["y"].rolling(window=5).mean()
+                y = df["avg_y"].values
         ax1.plot(x, y, color=colors[problem_id-1], marker=markers[problem_id-1],
                  markersize=4, markerfacecolor=marker_colors[problem_id-1],)
         selected_emd = df_emd[df_emd["problem_id"] == problem_id].values
@@ -69,6 +73,10 @@ def lineplot(transformation, indicator, ax1, conn):
         else:
             x = np.insert(selected_emd[:, 1], first_positive_index, 0.)
             y = np.insert(selected_emd[:, 2], first_positive_index, 0.)
+            if transformation == "x_translation":
+                df = pd.DataFrame(y, columns=["y"])
+                df["avg_y"] = df["y"].rolling(window=5).mean()
+                y = df["avg_y"].values
         ax2.plot(x, y, linestyle="dotted")
     ax1.set_xlabel(f"${indicator}$")
     ax1.set_ylabel('Percentage of changed ELA features', color='g')
@@ -116,7 +124,7 @@ if __name__ == "__main__":
                     label=build_label(problem_id, "doe2vec"))
     axs[0].legend(loc='upper left', bbox_to_anchor=(1.05, -0.9))
     # plt.tight_layout()
-    plt.savefig(f"results/aggregation/results.png")
-    plt.savefig(f"results/aggregation/results.svg")
+    plt.savefig(f"results/aggregation/results.png", dpi=600)
+    plt.savefig(f"results/aggregation/results.pdf")
     plt.cla()
     print("Done!")
