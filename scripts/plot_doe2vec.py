@@ -12,10 +12,7 @@ def diff(a, b):
     norm_a = np.linalg.norm(a)
     norm_b = np.linalg.norm(b)
     cos_theta = dot_product / (norm_a * norm_b)
-    cos_theta = np.clip(cos_theta, -1, 1)
-    theta_radians = np.arccos(cos_theta)
-    theta_degrees = np.degrees(theta_radians)
-    return theta_degrees
+    return cos_theta
 
 
 def aggregate_diff(a, list_b):
@@ -45,6 +42,13 @@ def lineplot(transformation, indicator, ax1):
             for j in range(100):
                 values += [[i+1, x[j], diffs[i, j]]]
         df = pd.DataFrame(values, columns=["problem_id", "x", "diff"])
+        for problem_id in range(1, 13):
+            df.loc[len(df)] = [problem_id, 0, 1]
+        sorted_df = df.sort_values(by="x")
+        sorted_df["Moving_Avg"] = sorted_df["diff"].rolling(window=5).mean()
+        result_df = df.copy()
+        result_df["diff"] = sorted_df['Moving_Avg'].values
+        df = result_df
     elif transformation == "y_translation":
         x = [5.0 + i * 5 for i in range(20)]
         vecs = np.loadtxt("ecta2024_data/y_translation/doe/vecs.txt")
@@ -55,6 +59,8 @@ def lineplot(transformation, indicator, ax1):
             for j in range(20):
                 values += [[i+1, x[j], diffs[i, j]]]
         df = pd.DataFrame(values, columns=["problem_id", "x", "diff"])
+        for problem_id in range(1, 13):
+            df.loc[len(df)] = [problem_id, 0, 1]
     else:
         x = [(i-30)/10 for i in range(30)] + [(i+1)/10 for i in range(30)]
         vecs = np.loadtxt(f"ecta2024_data/{transformation}/doe/vecs.txt")
@@ -65,12 +71,15 @@ def lineplot(transformation, indicator, ax1):
             for j in range(60):
                 values += [[i+1, x[j], diffs[i, j]]]
         df = pd.DataFrame(values, columns=["problem_id", "x", "diff"])
+        for problem_id in range(1, 13):
+            df.loc[len(df)] = [problem_id, 0, 1]
     # print(diffs.shape, x.shape)
     # print(x)
     for problem_id in range(1, 13):
         sns.lineplot(x="x", y="diff", data=df[df["problem_id"] == problem_id],
                      color=colors[problem_id-1], marker=markers[problem_id-1],
                      markersize=4, markerfacecolor=marker_colors[problem_id-1],
+                     markeredgecolor=colors[problem_id-1],
                      ax=ax1)
         # selected_y = df[df["problem_id"] == problem_id].values
         # if transformation == "x_rotation":
@@ -81,16 +90,23 @@ def lineplot(transformation, indicator, ax1):
         #     y = np.insert(selected_pvalue[:, 2], first_positive_index, 0.)
         # ax1.plot(x, y, color=colors[problem_id-1], marker=markers[problem_id-1],
         #          markersize=4, markerfacecolor=marker_colors[problem_id-1],)
+    if indicator == "trace":
+        indicator = "\\text{Tr}(R)"
     ax1.set_xlabel(f"${indicator}$")
-    ax1.set_ylabel('Change of DOE2VEC results in degree', color='g')
+    ax1.set_ylabel('Cosine Similarity of Changed DoE2Vec results', color='g')
     # ax1.tick_params(axis='y', labelcolor='g')
     # ax1.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1))
     # ax2.set_ylabel("EMD", color='b')
     # ax2.tick_params(axis='y', labelcolor='b')
-    ax1.set_title(f"{transformation}")
+    # ax1.set_title(f"{transformation}")
 
 
 if __name__ == "__main__":
+    if not os.path.exists("results/doe2vec/"):
+        os.mkdir("results/doe2vec/")
+    problem_type = ["Unimodal", "Basic", "Basic", "Basic", "Basic", "Hybrid",
+                    "Hybrid", "Hybrid", "Composition", "Composition",
+                    "Composition", "Composition"]
     transformations = ["x_translation",
                        "y_translation",
                        "x_scaling",
@@ -106,9 +122,23 @@ if __name__ == "__main__":
     markers = ['o', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd', '^', '<']
     marker_colors = [mcolors.to_rgba(color, alpha=0.5) for color in colors]
     plt.style.use("seaborn-v0_8-darkgrid")
-    fig, axs = plt.subplots(5, 1, figsize=(12, 15))
-    axs = axs.ravel()
+
     for i in range(len(transformations)):
-        lineplot(transformations[i], indicator[i], axs[i])
+        fig, ax = plt.subplots(figsize=(8, 4))
+        lineplot(transformations[i], indicator[i], ax)
+        plt.tight_layout()
+        plt.savefig(f"results/doe2vec/{transformations[i]}.png", dpi=400)
+        plt.cla()
+    fig, ax = plt.subplots(figsize=(8, 4))
+    for problem_id in range(1, 13):
+        ax.plot([], [], color=colors[problem_id-1],
+                marker=markers[problem_id-1],
+                markersize=4, label=f"No. {problem_id}, {problem_type[problem_id-1]} (DOE2Vec)",
+                markerfacecolor=marker_colors[problem_id-1])
+        # axs[0].plot([], [], color=colors[problem_id-1], linestyle="dashed",
+        #             label=build_label(problem_id, "doe2vec"))
+    ax.legend(loc='center', ncol=2)
+    ax.axis('off')
     plt.tight_layout()
-    plt.savefig("results/doe2vec.png")
+    plt.savefig(f"results/doe2vec/legend.png", dpi=400)
+    plt.cla()

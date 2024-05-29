@@ -2,6 +2,7 @@ import os
 import sqlite3
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.colors as mcolors
@@ -43,8 +44,6 @@ def lineplot(transformation, indicator, ax1, conn):
     df_emd = pd.read_sql_query(sql_query, conn)
     ax2 = ax1.twinx()
     for problem_id in range(1, 13):
-        # if problem_id > 5 and transformation not in ["x_rotation", "x_scaling", "y_translation", "y_scaling",]:
-        #     continue
         selected_pvalue = df_ks_pvalue[df_ks_pvalue["problem_id"]
                                        == problem_id].values
         columns_to_check = selected_pvalue[:, 2:]
@@ -64,6 +63,7 @@ def lineplot(transformation, indicator, ax1, conn):
                 y = df["avg_y"].values
         ax1.plot(x, y, color=colors[problem_id-1], marker=markers[problem_id-1],
                  markersize=4, markerfacecolor=marker_colors[problem_id-1],)
+        # plot EMD
         selected_emd = df_emd[df_emd["problem_id"] == problem_id].values
         columns_to_check = selected_emd[:, 2:]
         counts = np.sum(columns_to_check, axis=1)
@@ -84,7 +84,6 @@ def lineplot(transformation, indicator, ax1, conn):
     ax1.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1))
     ax2.set_ylabel("EMD", color='b')
     ax2.tick_params(axis='y', labelcolor='b')
-    ax1.set_title(f"{transformation}")
 
 
 if __name__ == "__main__":
@@ -106,25 +105,22 @@ if __name__ == "__main__":
     marker_colors = [mcolors.to_rgba(color, alpha=0.5) for color in colors]
     conn = sqlite3.connect("ecta2024_data/atom_data.db")
     plt.style.use("seaborn-v0_8-darkgrid")
-    fig, axs = plt.subplots(5, 1, figsize=(12, 15))
-    axs = axs.ravel()
-    # axs[5].axis('off')
     for i in range(len(transformations)):
-        lineplot(transformations[i], indicator[i], axs[i], conn)
-    plt.subplots_adjust(left=0.07, right=0.7, top=0.95,
-                        bottom=0.05, hspace=0.4, wspace=0.35)
+        fig, ax = plt.subplots(figsize=(8, 4))
+        lineplot(transformations[i], indicator[i], ax, conn)
+        plt.tight_layout()
+        plt.savefig(f"results/aggregation/{transformations[i]}.png", dpi=400)
+        plt.cla()
+    fig, ax = plt.subplots(figsize=(8, 4))
     for problem_id in range(1, 13):
-        axs[0].plot([], [], color=colors[problem_id-1],
-                    marker=markers[problem_id-1],
-                    markersize=4, label=build_label(problem_id, "kstest"),
-                    markerfacecolor=marker_colors[problem_id-1])
-        axs[0].plot([], [], color=colors[problem_id-1], linestyle="dotted",
-                    label=build_label(problem_id, "emd"))
-        axs[0].plot([], [], color=colors[problem_id-1], linestyle="dashed",
-                    label=build_label(problem_id, "doe2vec"))
-    axs[0].legend(loc='upper left', bbox_to_anchor=(1.05, -0.9))
-    # plt.tight_layout()
-    plt.savefig(f"results/aggregation/results.png", dpi=600)
-    plt.savefig(f"results/aggregation/results.pdf")
+        ax.plot([], [], color=colors[problem_id-1],
+                marker=markers[problem_id-1],
+                markersize=4, label=build_label(problem_id, "kstest"),
+                markerfacecolor=marker_colors[problem_id-1])
+        ax.plot([], [], color=colors[problem_id-1], linestyle="dotted",
+                label=build_label(problem_id, "emd"))
+    ax.legend(loc='lower center', ncol=2)
+    ax.axis('off')
+    plt.tight_layout()
+    plt.savefig(f"results/aggregation/legend.png", dpi=400)
     plt.cla()
-    print("Done!")
