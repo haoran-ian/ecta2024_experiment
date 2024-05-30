@@ -17,7 +17,7 @@ def format_labels(header):
         list: formatted labels
         list: colors
     """
-    marker_size = 200
+    marker_size = 20
     # set 5 colors for 5 problems, consider color blindness
     base_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
                    '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
@@ -27,35 +27,37 @@ def format_labels(header):
     label = "problem {}".format(int(header[0]))
     if int(header[5]) == 1:
         label += ", random translation limit: {}".format(header[2])
-        # map subtract_lim (90, 60, 30) to alpha (0.2, 0.5, 0.8)
-        if float(header[2]) == 90. or float(header[2]) == 900.:
-            alpha = 0.2
-        elif float(header[2]) == 60. or float(header[2]) == 600.:
-            alpha = 0.5
-        else:
-            alpha = 0.8
+        # # map subtract_lim (90, 60, 30) to alpha (0.2, 0.5, 0.8)
+        # if float(header[2]) == 90. or float(header[2]) == 900.:
+        #     alpha = 0.2
+        # elif float(header[2]) == 60. or float(header[2]) == 600.:
+        #     alpha = 0.5
+        # else:
+        #     alpha = 0.8
+        alpha = 1
         marker = "v"
         s = marker_size * alpha
     elif int(header[6]) == 1:
         label += ", random rotation."
         alpha = 1
-        marker = "x"
-        s = 20
+        marker = "D"
+        s = marker_size * alpha
     elif int(header[7]) == 1:
         label += ", scale factor: {}".format(header[4])
-        top = np.abs(np.log2(float(header[4])))
-        if top == 3.:
-            alpha = 0.2
-        elif top == 2.:
-            alpha = 0.5
-        else:
-            alpha = 0.8
+        # top = np.abs(np.log2(float(header[4])))
+        # if top == 3.:
+        #     alpha = 0.2
+        # elif top == 2.:
+        #     alpha = 0.5
+        # else:
+        #     alpha = 0.8
+        alpha = 1
         marker = "<" if float(header[4]) < 1 else ">"
         s = marker_size * alpha
     else:
         alpha = 1
         marker = "o"
-        s = 50
+        s = 20
     color = base_colors[int(header[0]) - 1] + "{:02x}".format(int(255 * alpha))
     # color = base_colors[int(header[0]) - 1]
     return label, color, marker, s
@@ -154,7 +156,7 @@ def plot_reducer(ax, reducer, samples, labels, title, origin=False):
         samples (numpy array): samples
         y (numpy array): labels
     """
-    plot_rate = 0.04
+    plot_rate = 0.1
     # plot LDA
     X = reducer.transform(samples)
     is_subtract = False
@@ -170,22 +172,21 @@ def plot_reducer(ax, reducer, samples, labels, title, origin=False):
         _, color, marker, s = format_labels(labels[i])
         if not origin and not is_trans:
             ax.scatter(-X[i, 0], X[i, 1], facecolors=color, marker=marker,
-                       s=s, edgecolors='black' if not is_rotate else None,
-                       linewidths=1, alpha=0.2)
+                       s=s, edgecolors='black', linewidths=0.2, alpha=0.2)
         else:
             ax.scatter(-X[i, 0], X[i, 1], facecolors=color, marker=marker,
-                       s=s, edgecolors='black' if not is_rotate else None,
-                       linewidths=1)
-    # ax.set_title(title)
+                       s=s, edgecolors='black', linewidths=0.2)
+    ax.set_title(title)
     # set legend
     legend_type = "subtract" if is_subtract else "rotate" if is_rotate else \
         "scale" if is_scale else "raw"
-    ax.set_xlabel("Component 1")
-    ax.set_ylabel("Component 2")
-    ax.set_aspect('equal', adjustable='box')
+    # ax.set_xlabel("Component 1")
+    # ax.set_ylabel("Component 2")
+    # ax.set_aspect('equal', adjustable='box')
     # locate at bottom left, size is slightly smaller than default, 2 columns
-    ax.legend(handles=legend_elements(legend_type),
-              loc='lower left', ncol=2, fontsize=9)
+    # ax.legend(handles=legend_elements(legend_type),
+    #           loc='lower left', ncol=2, fontsize=9)
+    plt.savefig(f"results/{title}.png")
 
 
 def convert_labels(labels, case="origin"):
@@ -214,7 +215,7 @@ if __name__ == "__main__":
                        "x_rotation",]
     conn = sqlite3.connect("ecta2024_data/atom_data.db")
     plt.style.use("seaborn-v0_8-darkgrid")
-    fig, axs = plt.subplots(2, 3, figsize=(10, 7))
+    fig, axs = plt.subplots(3, 2, figsize=(8, 8))
     axs = axs.ravel()
 
     sql_query = f"SELECT * FROM origin"
@@ -226,17 +227,18 @@ if __name__ == "__main__":
     plot_reducer(axs[0], reducer, origin_samples,
                  origin_labels, title="origin", origin=True)
 
-    # for i in range(len(transformations)):
-    #     transformation = transformations[i]
-    #     sql_query = f"SELECT * FROM {transformation}"
-    #     df = pd.read_sql_query(sql_query, conn)
-    #     samples = df.values[:, 2:]
-    #     labels = df.values[:, :2]
-    #     labels = convert_labels(labels, transformation)
-    #     samples = np.concatenate((origin_samples, samples))
-    #     labels = np.concatenate((origin_labels, labels))
-    #     plot_reducer(axs[i+1], reducer, samples, labels, title=transformation)
+    for i in range(len(transformations)):
+        transformation = transformations[i]
+        sql_query = f"SELECT * FROM {transformation}"
+        df = pd.read_sql_query(sql_query, conn)
+        samples = df.values[:, 2:]
+        labels = df.values[:, :2]
+        labels = convert_labels(labels, transformation)
+        samples = np.concatenate((origin_samples, samples))
+        labels = np.concatenate((origin_labels, labels))
+        plot_reducer(axs[i+1], reducer, samples, labels, title=transformation)
 
     plt.tight_layout()
     plt.legend()
     plt.savefig("results/umap.png")
+    plt.savefig("results/umap.eps")
