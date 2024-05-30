@@ -52,7 +52,9 @@ def lineplot(transformation, indicator, ax1, conn):
         ratios = counts / number_of_columns
         selected_pvalue[:, 2] = ratios
         if transformation == "x_rotation":
-            x, y = rotation_avg(selected_pvalue[:, 1], selected_pvalue[:, 2])
+            # x, y = rotation_avg(selected_pvalue[:, 1], selected_pvalue[:, 2])
+            x = np.array([-1.9 + i * 0.2 for i in range(20) for _ in range(5)])
+            y = selected_pvalue[:, 2]
         else:
             first_positive_index = np.where(selected_pvalue[:, 1] > 0)[0][0]
             x = np.insert(selected_pvalue[:, 1], first_positive_index, 0.)
@@ -61,8 +63,13 @@ def lineplot(transformation, indicator, ax1, conn):
                 df = pd.DataFrame(y, columns=["y"])
                 df["avg_y"] = df["y"].rolling(window=5).mean()
                 y = df["avg_y"].values
-        ax1.plot(x, y, color=colors[problem_id-1], marker=markers[problem_id-1],
-                 markersize=4, markerfacecolor=marker_colors[problem_id-1],)
+        df = pd.DataFrame(np.vstack([x, y]).T, columns=["x", "y"])
+        sns.lineplot(x="x", y="y", data=df, color=colors[problem_id-1],
+                     marker=markers[problem_id-1], markersize=4,
+                     markerfacecolor=marker_colors[problem_id-1],
+                     markeredgecolor=colors[problem_id-1], ax=ax1)
+        # ax1.plot(x, y, color=colors[problem_id-1], marker=markers[problem_id-1],
+        #          markersize=4, markerfacecolor=marker_colors[problem_id-1],)
         # plot EMD
         selected_emd = df_emd[df_emd["problem_id"] == problem_id].values
         columns_to_check = selected_emd[:, 2:]
@@ -78,6 +85,8 @@ def lineplot(transformation, indicator, ax1, conn):
                 df["avg_y"] = df["y"].rolling(window=5).mean()
                 y = df["avg_y"].values
         ax2.plot(x, y, linestyle="dotted")
+    if indicator == "trace":
+        indicator = "\\text{Tr}(R)"
     ax1.set_xlabel(f"${indicator}$")
     ax1.set_ylabel('Percentage of changed ELA features', color='g')
     ax1.tick_params(axis='y', labelcolor='g')
